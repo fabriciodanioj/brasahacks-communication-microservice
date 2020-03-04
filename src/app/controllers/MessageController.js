@@ -2,7 +2,7 @@ import TotalVoice from 'totalvoice-node';
 import User from '../models/User';
 import Message from '../models/Message';
 
-const api = new TotalVoice(process.env.ACCESS_TOKEN);
+const api = new TotalVoice(process.env.ACCESS_TOKEN2);
 
 class MessageControler {
   async store(req, res) {
@@ -10,7 +10,7 @@ class MessageControler {
       const { phone } = req.params;
       const { message } = req.body;
 
-      const { status, mensagem } = await api.sms.enviar(phone, message);
+      const { dados, status } = await api.sms.enviar(phone, message, true);
 
       let user = await User.findOne({ phone });
 
@@ -23,9 +23,10 @@ class MessageControler {
         message,
         messageStatus: status,
         user_id: user.id,
+        message_id: dados.id,
       });
 
-      return res.send({
+      return res.status(201).send({
         user: {
           user_id,
           phone,
@@ -34,11 +35,11 @@ class MessageControler {
           id,
           message,
           messageStatus,
-          mensagem,
+          message_id: dados.id,
         },
       });
     } catch (error) {
-      return res.send(error);
+      return res.status(400).send(error);
     }
   }
 
@@ -50,12 +51,12 @@ class MessageControler {
 
       const messages = await Message.find({ user_id });
 
-      return res.send({
+      return res.status(200).send({
         phone,
         messages,
       });
     } catch (error) {
-      return res.send(error);
+      return res.status(400).send(error);
     }
   }
 }
