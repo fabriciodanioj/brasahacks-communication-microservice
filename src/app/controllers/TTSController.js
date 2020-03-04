@@ -1,6 +1,6 @@
 import TotalVoice from 'totalvoice-node';
 import User from '../models/User';
-import Message from '../models/Message';
+import Tts from '../models/TTS';
 
 const api = new TotalVoice(process.env.ACCESS_TOKEN);
 
@@ -10,7 +10,22 @@ class MessageControler {
       const { phone } = req.params;
       const { message } = req.body;
 
-      const { status, mensagem } = await api.sms.enviar(phone, message);
+      const { status, mensagem } = await api.composto.enviar(
+        phone,
+        [
+          {
+            acao: 'tts',
+            acao_dados: {
+              mensagem: message,
+              velocidade: '-2',
+              tipo_voz: 'br-Vitoria',
+            },
+          },
+        ],
+        null,
+        'auto_range',
+        false
+      );
 
       let user = await User.findOne({ phone });
 
@@ -18,10 +33,10 @@ class MessageControler {
         user = await User.create({ phone });
       }
 
-      const { user_id, messageStatus, id } = await Message.create({
+      const { user_id, TTSStatus, id } = await Tts.create({
         phone,
-        message,
-        messageStatus: status,
+        text: message,
+        TTSStatus: status,
         user_id: user.id,
       });
 
@@ -30,10 +45,10 @@ class MessageControler {
           user_id,
           phone,
         },
-        message: {
+        TTS: {
           id,
           message,
-          messageStatus,
+          TTSStatus,
           mensagem,
         },
       });
@@ -48,7 +63,7 @@ class MessageControler {
 
       const { id: user_id } = await User.findOne({ phone });
 
-      const messages = await Message.find({ user_id });
+      const messages = await Tts.find({ user_id });
 
       return res.send({
         phone,

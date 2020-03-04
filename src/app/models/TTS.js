@@ -1,12 +1,12 @@
 import { Schema, model } from 'mongoose';
 
-const MessageSchema = new Schema(
+const TTSSchema = new Schema(
   {
-    messageStatus: {
+    TTSStatus: {
       type: String,
       required: true,
     },
-    message: {
+    text: {
       type: String,
       required: true,
     },
@@ -21,4 +21,4 @@ const MessageSchema = new Schema(
   }
 );
 
-export default model('Message', MessageSchema);
+export default model('TTS', TTSSchema);
